@@ -80,3 +80,7 @@ for epoch in range(10):  # エポック数を指定
             running_loss = 0.0
 
 print('Finished Training')
+
+# モデルの保存
+torch.save(model.state_dict(), 'pet_behavior_model.pth')
+print('Model saved successfully.')

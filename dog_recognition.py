@@ -2,9 +2,15 @@ import torch
 import cv2
 import torchvision.transforms as transforms
 
-# トレーニング済みモデルを読み込む
-model.load_state_dict(torch.load('path/to/your/model.pth'))
+# モデルのインスタンスを作成
+model = SimpleCNN(num_classes=4)
+
+# 保存したパラメータを読み込む
+model.load_state_dict(torch.load('pet_behavior_model.pth'))
+model.to(device)
 model.eval()
+
+print('Model loaded successfully.')
 
 # カメラの設定
 cap = cv2.VideoCapture(0)
@@ -20,7 +26,7 @@ while True:
         break
 
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image = transform(image).unsqueeze(0)
+    image = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         output = model(image)
