@@ -6,7 +6,7 @@ import time
 # データの読み込み関数
 @st.cache
 def load_data():
-    url = 'https://raw.githubusercontent.com/yourusername/dog_monitoring/main/action_durations.csv'
+    url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
     data = pd.read_csv(url)
     return data
 
