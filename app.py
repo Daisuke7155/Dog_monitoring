@@ -6,7 +6,7 @@ import time
 # データの読み込み関数
 @st.cache
 def load_data():
-    url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
+    url = 'https://raw.githubusercontent.com/yourusername/dog_monitoring/main/data/action_durations.csv'
     data = pd.read_csv(url)
     return data
 
@@ -28,6 +28,7 @@ def plot_action_counts(data):
     data['End Time'] = pd.to_datetime(data['End Time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
+    # 時間ごとに行動の回数をカウント
     action_counts = data.groupby([data['Start Time'].dt.floor('min'), 'Action']).size().unstack(fill_value=0)
 
     fig, ax = plt.subplots()
@@ -35,6 +36,7 @@ def plot_action_counts(data):
     plt.xlabel('Time')
     plt.ylabel('Action Count')
     plt.title('Action Counts Over Time')
+    plt.xticks(rotation=45)
     st.pyplot(fig)
 
 # Streamlitアプリのレイアウト
