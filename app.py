@@ -6,7 +6,9 @@ import time
 # データの読み込み関数
 @st.cache
 def load_data():
-    return pd.read_csv('action_durations.csv')
+    url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
+    data = pd.read_csv(url)
+    return data
 
 # データの更新関数
 def update_data(interval=60):
