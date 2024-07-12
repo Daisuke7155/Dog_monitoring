@@ -32,7 +32,7 @@ def plot_action_counts(data):
     action_counts = data.groupby([data['Start Time'].dt.floor('min'), 'Action']).size().unstack(fill_value=0)
 
     fig, ax = plt.subplots()
-    action_counts.plot(ax=ax)
+    action_counts.plot(kind='bar', ax=ax)
     plt.xlabel('Time')
     plt.ylabel('Action Count')
     plt.title('Action Counts Over Time')
