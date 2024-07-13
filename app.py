@@ -13,19 +13,22 @@ def update_behavior_data():
     behavior_data_url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
     data = load_data(behavior_data_url)
     st.write(f"Behavior data updated at {pd.Timestamp.now()}")
-    st.dataframe(data)
     plot_action_durations(data)
+    st.dataframe(data)
 
 # 尿分析データの更新関数
 def update_urine_data():
     urine_data_url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/urine_data.csv'  # 仮のURL
     data = load_data(urine_data_url)
     st.write(f"Urine data updated at {pd.Timestamp.now()}")
-    st.dataframe(data)
     plot_urine_analysis(data)
+    st.dataframe(data)
 
 # 行動時間の合計をプロットする関数
 def plot_action_durations(data):
+    data['Start Time'] = pd.to_datetime(data['Start Time'])
+    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 行動ごとの合計時間を計算
     action_durations = data.groupby('Action')['Duration (s)'].sum()
@@ -43,12 +46,6 @@ def plot_action_durations(data):
     plt.title('Total Duration of Each Action Over the Day')
     plt.xticks(rotation=45)
     st.pyplot(fig)
-
-    # データ
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
-    data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
-
 
 # 尿分析データをプロットする関数（仮の内容）
 def plot_urine_analysis(data):
