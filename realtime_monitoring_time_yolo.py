@@ -15,7 +15,7 @@ model = torch.hub.load(yolov5_path, 'custom', path=os.path.join(yolov5_path, 'yo
 
 # 行動分類モデルの定義
 class SimpleCNN(torch.nn.Module):
-    def __init__(self, num_classes=4):
+    def __init__(self, num_classes=6):  # クラス数を6に変更
         super(SimpleCNN, self).__init__()
         self.conv1 = torch.nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
@@ -32,7 +32,7 @@ class SimpleCNN(torch.nn.Module):
         return x
 
 # 行動分類モデルの読み込み
-behavior_model = SimpleCNN(num_classes=4)
+behavior_model = SimpleCNN(num_classes=6)
 model_path = os.path.join(os.path.dirname(__file__), 'models/pet_behavior_model.pth')
 behavior_model.load_state_dict(torch.load(model_path))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -41,7 +41,7 @@ behavior_model.eval()
 
 # クラスラベルの定義
 classes = model.names
-behavior_classes = ['drinking', 'sleeping', 'barking', 'defecating']
+behavior_classes = ['barking', 'sleeping', 'awake', 'drinking', 'defecating', 'urinating']
 
 # 画像の前処理
 transform = T.Compose([
@@ -110,27 +110,31 @@ try:
                 # 行動分類
                 with torch.no_grad():
                     behavior_outputs = behavior_model(roi_tensor)
-                    _, predicted = torch.max(behavior_outputs, 1)
-                    action = behavior_classes[predicted.item()]
+                    softmax = torch.nn.Softmax(dim=1)
+                    probs = softmax(behavior_outputs)
+                    max_prob, predicted = torch.max(probs, 1)
+                    
+                    if max_prob.item() >= 0.5:
+                        action = behavior_classes[predicted.item()]
 
-                # 行動の時間計測
-                end_time = time.time()
-                if current_action is not None and start_time is not None:
-                    duration = end_time - start_time
-                    action_records.append({
-                        'Action': current_action,
-                        'Start Time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time)),
-                        'End Time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time)),
-                        'Duration (s)': duration
-                    })
-                    print(f"{current_action} duration: {duration:.2f} seconds")
+                        # 行動の時間計測
+                        end_time = time.time()
+                        if current_action is not None and start_time is not None:
+                            duration = end_time - start_time
+                            action_records.append({
+                                'Action': current_action,
+                                'Start Time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time)),
+                                'End Time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time)),
+                                'Duration (s)': duration
+                            })
+                            print(f"{current_action} duration: {duration:.2f} seconds")
 
-                current_action = action
-                start_time = end_time
+                        current_action = action
+                        start_time = end_time
 
-                # バウンダリボックスと行動ラベルの描画
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, f'Dog: {conf:.2f}, Action: {action}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+                        # バウンダリボックスと行動ラベルの描画
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        cv2.putText(frame, f'Dog: {conf:.2f}, Action: {action}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
 
         # 結果の表示
         cv2.imshow('Video', frame)
