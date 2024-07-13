@@ -25,6 +25,12 @@ def plot_action_durations(data):
     # 行動ごとの合計時間を計算
     action_durations = data.groupby('Action')['Duration (s)'].sum()
 
+    # 各行動の合計時間を表示
+    st.subheader('Total Duration of Each Action')
+    for action, duration in action_durations.items():
+        st.write(f'{action}: {duration} seconds')
+
+    # 棒グラフのプロット
     fig, ax = plt.subplots()
     action_durations.plot(kind='bar', ax=ax)
     plt.xlabel('Action')
