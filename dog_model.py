@@ -11,7 +11,7 @@ class PetBehaviorDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.classes = ['drinking', 'sleeping', 'barking', 'defecating']
+        self.classes = ['barking', 'sleeping', 'awake', 'drinking', 'defecating', 'urinating']
         self.data = []
         for class_name in self.classes:
             class_dir = os.path.join(root_dir, class_name)
@@ -44,7 +44,7 @@ dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 # CNNモデルの定義
 class SimpleCNN(nn.Module):
-    def __init__(self, num_classes=4):
+    def __init__(self, num_classes=6):  # クラス数を6に変更
         super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
@@ -61,7 +61,7 @@ class SimpleCNN(nn.Module):
         return x
 
 # モデルのトレーニング
-model = SimpleCNN(num_classes=4)
+model = SimpleCNN(num_classes=6)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -82,5 +82,5 @@ for epoch in range(10):  # エポック数を指定
 print('Finished Training')
 
 # モデルの保存
-torch.save(model.state_dict(), 'models\pet_behavior_model.pth')
+torch.save(model.state_dict(), 'models/pet_behavior_model.pth')
 print('Model saved successfully.')
