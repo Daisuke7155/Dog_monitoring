@@ -14,28 +14,28 @@ def update_data():
     data = load_data()
     st.write(f"Data updated at {pd.Timestamp.now()}")
     st.dataframe(data)
-    plot_action_counts(data)
+    plot_action_durations(data)
 
-# 行動回数のプロット関数
-def plot_action_counts(data):
+# 行動時間の合計をプロットする関数
+def plot_action_durations(data):
     data['Start Time'] = pd.to_datetime(data['Start Time'])
     data['End Time'] = pd.to_datetime(data['End Time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
-    # 時間ごとに行動の回数をカウント
-    action_counts = data.groupby([data['Start Time'].dt.floor('min'), 'Action']).size().unstack(fill_value=0)
+    # 行動ごとの合計時間を計算
+    action_durations = data.groupby('Action')['Duration (s)'].sum()
 
     fig, ax = plt.subplots()
-    action_counts.plot(kind='bar', ax=ax)
-    plt.xlabel('Time')
-    plt.ylabel('Action Count')
-    plt.title('Action Counts Over Time')
+    action_durations.plot(kind='bar', ax=ax)
+    plt.xlabel('Action')
+    plt.ylabel('Total Duration (s)')
+    plt.title('Total Duration of Each Action Over the Day')
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
-st.write("This app monitors the dog behavior data periodically and plots action counts over time.")
+st.write("This app monitors the dog behavior data periodically and plots total durations of each action over the day.")
 
 # データの更新ボタン
 if st.button('Update Data'):
