@@ -57,7 +57,7 @@ def plot_urine_analysis(data):
 st.title("Dog Monitoring Data")
 
 # サイドバーにページのリンクを追加
-page = st.sidebar.radio("Select a Page", ["Home", "行動分析", "尿分析"])
+page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary Analysis"])
 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
