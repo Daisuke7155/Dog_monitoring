@@ -56,16 +56,16 @@ def plot_urine_analysis(data):
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
 
-# ページの選択
-page = st.sidebar.selectbox("Select a Page", ["Home", "行動分析", "尿分析"])
+# サイドバーにページのリンクを追加
+page = st.sidebar.radio("Select a Page", ["Home", "行動分析", "尿分析"])
 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
-elif page == "行動分析":
+elif page == "Behavior Analysis":
     st.write("This section provides an analysis of the dog's behavior data.")
     if st.button('Update Behavior Data'):
         update_behavior_data()
-elif page == "尿分析":
+elif page == "Urinary Analysis":
     st.write("This section provides an analysis of the dog's urine data.")
     if st.button('Update Urine Data'):
         update_urine_data()
