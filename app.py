@@ -40,6 +40,3 @@ st.write("This app monitors the dog behavior data periodically and plots total d
 # データの更新ボタン
 if st.button('Update Data'):
     update_data()
-
-# 初回のデータ表示
-update_data()
