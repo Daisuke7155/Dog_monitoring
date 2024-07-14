@@ -14,6 +14,7 @@ def update_behavior_data():
     data = load_data(behavior_data_url)
     st.write(f"Behavior data updated at {pd.Timestamp.now()}")
     plot_action_durations(data)
+    plot_cumulative_action_durations(data)
     st.dataframe(data)
 
 # 尿分析データの更新関数
@@ -44,6 +45,29 @@ def plot_action_durations(data):
     plt.xlabel('Action')
     plt.ylabel('Total Duration (s)')
     plt.title('Total Duration of Each Action Over the Day')
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+
+# 各時刻に対する各行動の積算時間をプロットする関数
+def plot_cumulative_action_durations(data):
+    data['Start Time'] = pd.to_datetime(data['Start Time'])
+    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
+
+    # 各行動の積算時間を計算
+    cumulative_data = data.copy()
+    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
+
+    fig, ax = plt.subplots()
+    for action in cumulative_data['Action'].unique():
+        action_data = cumulative_data[cumulative_data['Action'] == action]
+        action_data = action_data.sort_values('Start Time')
+        ax.plot(action_data['Start Time'], action_data['Cumulative Duration (s)'], label=action)
+
+    plt.xlabel('Time')
+    plt.ylabel('Cumulative Duration (s)')
+    plt.title('Cumulative Duration of Each Action Over Time')
+    plt.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
