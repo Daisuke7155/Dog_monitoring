@@ -16,13 +16,32 @@ def update_behavior_data():
     behavior_data_url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
     data = load_data(behavior_data_url)
     st.write(f"Behavior data updated at {pd.Timestamp.now()}")
+
+    st.markdown("## 📊 Behavior Analysis")
+    
+    st.markdown("### Count of Specific Actions")
     action_counts = count_actions(data)
-    st.subheader('Count of Specific Actions')
     for action, count in action_counts.items():
-        st.write(f'{action}: {count} times')
+        st.markdown(f"**{action.capitalize()}**: {count} times")
+    
+    st.markdown("---")
+    
+    st.markdown("### Total Duration of Each Action")
     plot_action_durations(data)
+    
+    st.markdown("---")
+    
+    st.markdown("### Cumulative Duration of Each Action Over Time")
     plot_cumulative_action_durations(data)
+    
+    st.markdown("---")
+    
+    st.markdown("### Count of Each Action Over Time")
     plot_action_counts_over_time(data)
+    
+    st.markdown("---")
+    
+    st.markdown("### Raw Data")
     st.dataframe(data)
 
 # 尿分析データの更新関数
@@ -79,7 +98,7 @@ def plot_action_counts_over_time(data):
     
     fig, ax = plt.subplots()
     for action in actions:
-        ax.plot(dates, action_counts[action], 'o', label=action)  # ドットでプロット
+        ax.plot(dates, action_counts[action], 'o-', label=action)  # ドットでプロット
     
     plt.xlabel('Date')
     plt.ylabel('Count')
@@ -97,10 +116,13 @@ def plot_action_durations(data):
     # 行動ごとの合計時間を計算
     action_durations = data.groupby('Action')['Duration (s)'].sum()
 
-    # 各行動の合計時間を表示
-    st.subheader('Total Duration of Each Action')
-    for action, duration in action_durations.items():
-        st.write(f'{action}: {duration} seconds')
+    fig, ax = plt.subplots()
+    action_durations.plot(kind='bar', ax=ax, color='skyblue')
+    plt.xlabel('Action')
+    plt.ylabel('Total Duration (s)')
+    plt.title('Total Duration of Each Action Over the Day')
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
@@ -165,7 +187,7 @@ if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
     st.image("home.png", caption="Home Image")
 elif page == "Behavior Analysis":
-    st.write("This section provides an analysis of the dog's behavior data.")
+    st.write("## 📊 Behavior Analysis")
     if st.button('Update Behavior Data'):
         update_behavior_data()
 elif page == "Urinary Analysis":
