@@ -13,6 +13,10 @@ def update_behavior_data():
     behavior_data_url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
     data = load_data(behavior_data_url)
     st.write(f"Behavior data updated at {pd.Timestamp.now()}")
+    action_counts = count_actions(data)
+    st.subheader('Count of Specific Actions')
+    for action, count in action_counts.items():
+        st.write(f'{action}: {count} times')
     plot_action_durations(data)
     plot_cumulative_action_durations(data)
     plot_action_counts_over_time(data)
@@ -72,7 +76,7 @@ def plot_action_counts_over_time(data):
     
     fig, ax = plt.subplots()
     for action in actions:
-        ax.plot(dates, action_counts[action], label=action)
+        ax.plot(dates, action_counts[action], 'o', label=action)  # ドットでプロット
     
     plt.xlabel('Date')
     plt.ylabel('Count')
@@ -136,11 +140,6 @@ elif page == "Behavior Analysis":
     st.write("This section provides an analysis of the dog's behavior data.")
     if st.button('Update Behavior Data'):
         update_behavior_data()
-        data = load_data('https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv')
-        action_counts = count_actions(data)
-        st.subheader('Count of Specific Actions')
-        for action, count in action_counts.items():
-            st.write(f'{action}: {count} times')
 elif page == "Urinary Analysis":
     st.write("This section provides an analysis of the dog's urine data.")
     if st.button('Update Urine Data'):
