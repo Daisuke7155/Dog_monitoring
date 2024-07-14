@@ -51,10 +51,6 @@ def count_actions(data):
                             action_count += 1
             action_counts[action] = action_count
 
-    st.subheader('Count of Specific Actions')
-    for action, count in action_counts.items():
-        st.write(f'{action}: {count} times')
-    
     return action_counts
 
 # 行動回数を日付ごとにプロットする関数
@@ -64,7 +60,7 @@ def plot_action_counts_over_time(data):
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
     data['Date'] = data['Start Time'].dt.date
     
-    actions = ['barking', 'sleeping', 'awake', 'drinking', 'defecating', 'urinating']
+    actions = ['drinking', 'defecating', 'urinating']
     action_counts = {action: [] for action in actions}
     dates = sorted(data['Date'].unique())
     
@@ -98,6 +94,15 @@ def plot_action_durations(data):
     st.subheader('Total Duration of Each Action')
     for action, duration in action_durations.items():
         st.write(f'{action}: {duration} seconds')
+
+    # 棒グラフのプロット
+    fig, ax = plt.subplots()
+    action_durations.plot(kind='bar', ax=ax)
+    plt.xlabel('Action')
+    plt.ylabel('Total Duration (s)')
+    plt.title('Total Duration of Each Action Over the Day')
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
