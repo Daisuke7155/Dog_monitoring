@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import cv2
+from PIL import Image
+import requests
+from io import BytesIO
 
 # データの読み込み関数
 @st.cache
@@ -128,11 +132,35 @@ def plot_urine_analysis(data):
     st.subheader('Urine Analysis Data')
     st.write("Plotting urine analysis data is not yet implemented.")
 
+# リアルタイム動画を表示する関数
+def display_real_time_video():
+    st.subheader('Real-Time Video Feed')
+    run = st.checkbox('Run')
+    if run:
+        stframe = st.empty()
+        while True:
+            # Raspberry PiからMJPEGストリームを取得
+            stream_url = "http://<Raspberry_Pi_IP>:8080/?action=stream"  # <Raspberry_Pi_IP>をRaspberry PiのIPアドレスに置き換えてください
+            response = requests.get(stream_url, stream=True)
+            if response.status_code == 200:
+                bytes_data = b''
+                for chunk in response.iter_content(chunk_size=1024):
+                    bytes_data += chunk
+                    a = bytes_data.find(b'\xff\xd8')
+                    b = bytes_data.find(b'\xff\xd9')
+                    if a != -1 and b != -1:
+                        jpg = bytes_data[a:b+2]
+                        bytes_data = bytes_data[b+2:]
+                        img = Image.open(BytesIO(jpg))
+                        stframe.image(img, use_column_width=True)
+            else:
+                st.write("Failed to get video stream")
+
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
 
 # サイドバーにページのリンクを追加
-page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary Analysis"])
+page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary Analysis", "Real-Time Video"])
 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
@@ -145,3 +173,5 @@ elif page == "Urinary Analysis":
     st.write("This section provides an analysis of the dog's urine data.")
     if st.button('Update Urine Data'):
         update_urine_data()
+elif page == "Real-Time Video":
+    display_real_time_video()
