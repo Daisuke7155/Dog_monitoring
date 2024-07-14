@@ -136,6 +136,7 @@ page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary 
 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
+    st.image("home.png", caption="Home Image")
 elif page == "Behavior Analysis":
     st.write("This section provides an analysis of the dog's behavior data.")
     if st.button('Update Behavior Data'):
