@@ -15,6 +15,7 @@ def update_behavior_data():
     st.write(f"Behavior data updated at {pd.Timestamp.now()}")
     plot_action_durations(data)
     plot_cumulative_action_durations(data)
+    plot_action_counts_over_time(data)
     st.dataframe(data)
 
 # 尿分析データの更新関数
@@ -53,6 +54,36 @@ def count_actions(data):
     st.subheader('Count of Specific Actions')
     for action, count in action_counts.items():
         st.write(f'{action}: {count} times')
+    
+    return action_counts
+
+# 行動回数を日付ごとにプロットする関数
+def plot_action_counts_over_time(data):
+    data['Start Time'] = pd.to_datetime(data['Start Time'])
+    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
+    data['Date'] = data['Start Time'].dt.date
+    
+    actions = ['barking', 'sleeping', 'awake', 'drinking', 'defecating', 'urinating']
+    action_counts = {action: [] for action in actions}
+    dates = sorted(data['Date'].unique())
+    
+    for date in dates:
+        daily_data = data[data['Date'] == date]
+        daily_counts = count_actions(daily_data)
+        for action in actions:
+            action_counts[action].append(daily_counts[action])
+    
+    fig, ax = plt.subplots()
+    for action in actions:
+        ax.plot(dates, action_counts[action], label=action)
+    
+    plt.xlabel('Date')
+    plt.ylabel('Count')
+    plt.title('Count of Each Action Over Time')
+    plt.legend()
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
 # 行動時間の合計をプロットする関数
 def plot_action_durations(data):
@@ -67,15 +98,6 @@ def plot_action_durations(data):
     st.subheader('Total Duration of Each Action')
     for action, duration in action_durations.items():
         st.write(f'{action}: {duration} seconds')
-
-    # 棒グラフのプロット
-    fig, ax = plt.subplots()
-    action_durations.plot(kind='bar', ax=ax)
-    plt.xlabel('Action')
-    plt.ylabel('Total Duration (s)')
-    plt.title('Total Duration of Each Action Over the Day')
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
 
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
