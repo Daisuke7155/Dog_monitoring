@@ -116,13 +116,13 @@ def plot_action_durations(data):
     # 行動ごとの合計時間を計算
     action_durations = data.groupby('Action')['Duration (s)'].sum()
 
-    fig, ax = plt.subplots()
-    action_durations.plot(kind='bar', ax=ax, color='skyblue')
-    plt.xlabel('Action')
-    plt.ylabel('Total Duration (s)')
-    plt.title('Total Duration of Each Action Over the Day')
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
+    # fig, ax = plt.subplots()
+    # action_durations.plot(kind='bar', ax=ax, color='skyblue')
+    # plt.xlabel('Action')
+    # plt.ylabel('Total Duration (s)')
+    # plt.title('Total Duration of Each Action Over the Day')
+    # plt.xticks(rotation=45)
+    # st.pyplot(fig)
 
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
