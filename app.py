@@ -26,11 +26,6 @@ def update_behavior_data():
     
     st.markdown("---")
     
-    st.markdown("### Total Duration of Each Action")
-    plot_action_durations(data)
-    
-    st.markdown("---")
-    
     st.markdown("### Cumulative Duration of Each Action Over Time")
     plot_cumulative_action_durations(data)
     
@@ -187,7 +182,7 @@ if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
     st.image("home.png", caption="Home Image")
 elif page == "Behavior Analysis":
-    st.write("## 📊 Behavior Analysis")
+    st.write("Behavior Analysis")
     if st.button('Update Behavior Data'):
         update_behavior_data()
 elif page == "Urinary Analysis":
