@@ -95,15 +95,6 @@ def plot_action_durations(data):
     for action, duration in action_durations.items():
         st.write(f'{action}: {duration} seconds')
 
-    # 棒グラフのプロット
-    fig, ax = plt.subplots()
-    action_durations.plot(kind='bar', ax=ax)
-    plt.xlabel('Action')
-    plt.ylabel('Total Duration (s)')
-    plt.title('Total Duration of Each Action Over the Day')
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
     data['Start Time'] = pd.to_datetime(data['Start Time'])
@@ -146,7 +137,10 @@ elif page == "Behavior Analysis":
     if st.button('Update Behavior Data'):
         update_behavior_data()
         data = load_data('https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv')
-        count_actions(data)
+        action_counts = count_actions(data)
+        st.subheader('Count of Specific Actions')
+        for action, count in action_counts.items():
+            st.write(f'{action}: {count} times')
 elif page == "Urinary Analysis":
     st.write("This section provides an analysis of the dog's urine data.")
     if st.button('Update Urine Data'):
