@@ -29,7 +29,6 @@ def load_data_from_sheets(sheet_name):
             st.error("SPREADSHEET_KEY is not set.")
             return None
 
-        st.write(f"Loading data from sheet: {sheet_name}")  # Debug message
         worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
         data = worksheet.get_all_records()
         if not data:
@@ -42,6 +41,35 @@ def load_data_from_sheets(sheet_name):
         return None
     except Exception as e:
         st.error(f"Error loading data from Google Sheets: {e}")
+        return None
+
+# シート名を取得する関数
+def get_sheet_names():
+    try:
+        credentials_info = os.getenv('GOOGLE_CREDENTIALS')
+        if not credentials_info:
+            st.error("GOOGLE_CREDENTIALS is not set.")
+            return None
+
+        credentials_info = json.loads(credentials_info)
+
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
+        gc = gspread.authorize(credentials)
+
+        spreadsheet_key = os.getenv('SPREADSHEET_KEY')
+        if not spreadsheet_key:
+            st.error("SPREADSHEET_KEY is not set.")
+            return None
+
+        spreadsheet = gc.open_by_key(spreadsheet_key)
+        sheet_names = [sheet.title for sheet in spreadsheet.worksheets()]
+        return sheet_names
+    except gspread.exceptions.SpreadsheetNotFound:
+        st.error("Spreadsheet not found. Please check the spreadsheet key and ensure the service account has access.")
+        return None
+    except Exception as e:
+        st.error(f"Error getting sheet names from Google Sheets: {e}")
         return None
 
 # 行動データの更新関数
@@ -74,11 +102,15 @@ def update_behavior_data():
 
 # 尿分析データの更新関数
 def update_urine_data():
-    data = load_data_from_sheets("CV")
-    if data is not None:
-        st.write(f"Urine data updated at {pd.Timestamp.now()}")
-        plot_urine_analysis(data)
-        st.dataframe(data)
+    sheet_names = get_sheet_names()
+    if sheet_names and "CV" in sheet_names:
+        data = load_data_from_sheets("CV")
+        if data is not None:
+            st.write(f"Urine data updated at {pd.Timestamp.now()}")
+            plot_urine_analysis(data)
+            st.dataframe(data)
+    else:
+        st.error("Sheet 'CV' not found in the spreadsheet. Please check the sheet name.")
 
 # 行動回数をカウントする関数
 def count_actions(data):
@@ -150,15 +182,13 @@ def plot_cumulative_action_durations(data):
     data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
-    # 各行動の積算時間を計算
-    cumulative_data = data.copy()
-    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
+    # 各時刻における行動ごとの合計時間を計算
+    cumulative_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().groupby(level=1).cumsum().reset_index()
 
     fig, ax = plt.subplots()
     for action in cumulative_data['Action'].unique():
         action_data = cumulative_data[cumulative_data['Action'] == action]
-        action_data = action_data.sort_values('Start time')
-        ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
+        ax.plot(action_data['Start time'], action_data['Duration (s)'], label=action)
 
     plt.xlabel('Time')
     plt.ylabel('Cumulative Duration (s)')
@@ -173,11 +203,12 @@ def plot_urine_analysis(data):
     data['cv [mS/m]'] = pd.to_numeric(data['cv [mS/m]'])
 
     fig, ax = plt.subplots()
-    ax.plot(data['time'], data['cv [mS/m]'], 'o-')
+    ax.plot(data['time'], data['cv [mS/m]'], label='CV [mS/m]', marker='o')
 
     plt.xlabel('Time')
-    plt.ylabel('Conductivity (mS/m)')
-    plt.title('Urine Conductivity Over Time')
+    plt.ylabel('CV [mS/m]')
+    plt.title('Urine Analysis Over Time')
+    plt.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
@@ -210,6 +241,11 @@ st.title("Dog Monitoring Data")
 
 # サイドバーにページのリンクを追加
 page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary Analysis", "Real-Time Video"])
+
+# シート名の一覧を取得して表示
+sheet_names = get_sheet_names()
+if sheet_names:
+    st.sidebar.write("Available sheets:", sheet_names)
 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
