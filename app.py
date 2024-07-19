@@ -175,7 +175,8 @@ def display_real_time_video():
     if run:
         stframe = st.empty()
         while True:
-            stream_url = "http://<Raspberry_Pi_IP>:8080/?action=stream"
+            # Raspberry PiからMJPEGストリームを取得
+            stream_url = "http://<Raspberry_Pi_IP>:8080/?action=stream"  # <Raspberry_Pi_IP>をRaspberry PiのIPアドレスに置き換えてください
             response = requests.get(stream_url, stream=True)
             if response.status_code == 200:
                 bytes_data = b''
@@ -194,6 +195,7 @@ def display_real_time_video():
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
 
+# サイドバーにページのリンクを追加
 page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary Analysis", "Real-Time Video"])
 
 if page == "Home":
