@@ -86,7 +86,7 @@ def count_actions(data):
     data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
     
-    actions = ['drinking', 'defecating', 'urinating', 'awake']
+    actions = ['drinking', 'defecating', 'urinating']
     action_counts = {action: 0 for action in actions}
 
     for action in actions:
@@ -114,7 +114,7 @@ def plot_action_counts_over_time(data):
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
     data['Date'] = data['Start time'].dt.date
     
-    actions = ['drinking', 'defecating', 'urinating', 'awake']
+    actions = ['drinking', 'defecating', 'urinating']
     action_counts = {action: [] for action in actions}
     dates = sorted(data['Date'].unique())
     
@@ -140,6 +140,9 @@ def plot_cumulative_action_durations(data):
     data['Start time'] = pd.to_datetime(data['Start time'])
     data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
+
+    # 同じ時刻の Duration (s) を合計
+    data = data.groupby(['Action', 'Start time']).agg({'Duration (s)': 'sum'}).reset_index()
 
     # 各行動の積算時間を計算
     cumulative_data = data.copy()
