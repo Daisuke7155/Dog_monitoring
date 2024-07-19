@@ -4,48 +4,69 @@ import matplotlib.pyplot as plt
 import requests
 from PIL import Image
 from io import BytesIO
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import json
 
-# データの読み込み関数
-@st.cache
-def load_data(url):
-    data = pd.read_csv(url)
-    return data
+# Google Sheetsからデータを読み込む関数
+def load_data_from_sheets(sheet_name):
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials_path = './config/dogmonitoring-92d60377d8b3.json'
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
+        gc = gspread.authorize(credentials)
+
+        # スプレッドシートキーを外部ファイルから読み込む
+        with open('./config/spreadsheet_key.json', 'r') as key_file:
+            key_data = json.load(key_file)
+            spreadsheet_key = key_data['SPREADSHEET_KEY']
+
+        worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
+        data = worksheet.get_all_records()
+        df = pd.DataFrame(data)
+        return df
+    except gspread.exceptions.SpreadsheetNotFound:
+        st.error("Spreadsheet not found. Please check the spreadsheet key and ensure the service account has access.")
+        return None
+    except Exception as e:
+        st.error(f"Error loading data from Google Sheets: {e}")
+        return None
 
 # 行動データの更新関数
 def update_behavior_data():
-    behavior_data_url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/action_durations.csv'
-    data = load_data(behavior_data_url)
-    st.write(f"Behavior data updated at {pd.Timestamp.now()}")
+    data = load_data_from_sheets("Behavior Data")
+    if data is not None:
+        st.write(f"Behavior data updated at {pd.Timestamp.now()}")
 
-    st.markdown("## 📊 Behavior Analysis")
-    
-    st.markdown("### Count of Specific Actions")
-    action_counts = count_actions(data)
-    for action, count in action_counts.items():
-        st.markdown(f"**{action.capitalize()}**: {count} times")
-    
-    st.markdown("---")
-    
-    st.markdown("### Cumulative Duration of Each Action Over Time")
-    plot_cumulative_action_durations(data)
-    
-    st.markdown("---")
-    
-    st.markdown("### Count of Each Action Over Time")
-    plot_action_counts_over_time(data)
-    
-    st.markdown("---")
-    
-    st.markdown("### Raw Data")
-    st.dataframe(data)
+        st.markdown("## 📊 Behavior Analysis")
+        
+        st.markdown("### Count of Specific Actions")
+        action_counts = count_actions(data)
+        for action, count in action_counts.items():
+            st.markdown(f"**{action.capitalize()}**: {count} times")
+        
+        st.markdown("---")
+        
+        st.markdown("### Cumulative Duration of Each Action Over Time")
+        plot_cumulative_action_durations(data)
+        
+        st.markdown("---")
+        
+        st.markdown("### Count of Each Action Over Time")
+        plot_action_counts_over_time(data)
+        
+        st.markdown("---")
+        
+        st.markdown("### Raw Data")
+        st.dataframe(data)
 
 # 尿分析データの更新関数
 def update_urine_data():
-    urine_data_url = 'https://raw.githubusercontent.com/Daisuke7155/dog_monitoring/main/urine_data.csv'  # 仮のURL
-    data = load_data(urine_data_url)
-    st.write(f"Urine data updated at {pd.Timestamp.now()}")
-    plot_urine_analysis(data)
-    st.dataframe(data)
+    data = load_data_from_sheets("Urine Data")
+    if data is not None:
+        st.write(f"Urine data updated at {pd.Timestamp.now()}")
+        plot_urine_analysis(data)
+        st.dataframe(data)
 
 # 行動回数をカウントする関数
 def count_actions(data):
