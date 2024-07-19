@@ -4,6 +4,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
+import statistics
+
 
 class DFRobot_EC:
     def __init__(self):
@@ -54,6 +56,8 @@ ec = DFRobot_EC()
 
 def main():
     worksheet = init_google_sheets()
+    temperature_data = []
+    ec_data = []
     data = []
 
     print("Press 'f' to finish measuring and upload data.")
@@ -67,6 +71,8 @@ def main():
             print(f"Temperature: {temperature:.1f} °C")
             print(f"EC: {ecValue:.2f} mS/m")
 
+            temperature_data.append(temperature)
+            ec_data.append(ecValue)
             data.append([time.strftime('%Y-%m-%d %H:%M:%S'), temperature, ecValue])
 
             ec.calibration(voltage, temperature)
@@ -76,6 +82,12 @@ def main():
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
+        if temperature_data and ec_data:
+            avg_temperature = statistics.mean(temperature_data)
+            avg_ecValue = statistics.mean(ec_data)
+            timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+            worksheet.append_row([timestamp, avg_temperature, avg_ecValue])
+            print("Average data uploaded to Google Sheets.")
         if data:
             worksheet.append_rows(data)
             print("Data uploaded to Google Sheets.")
