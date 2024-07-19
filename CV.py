@@ -6,7 +6,6 @@ import json
 import os
 import statistics
 
-
 class DFRobot_EC:
     def __init__(self):
         self.temperature = 25.0  # 固定温度値
@@ -58,7 +57,6 @@ def main():
     worksheet = init_google_sheets()
     temperature_data = []
     ec_data = []
-    data = []
 
     print("Press 'f' to finish measuring and upload data.")
 
@@ -73,7 +71,6 @@ def main():
 
             temperature_data.append(temperature)
             ec_data.append(ecValue)
-            data.append([time.strftime('%Y-%m-%d %H:%M:%S'), temperature, ecValue])
 
             ec.calibration(voltage, temperature)
             time.sleep(1)
@@ -88,9 +85,6 @@ def main():
             timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
             worksheet.append_row([timestamp, avg_temperature, avg_ecValue])
             print("Average data uploaded to Google Sheets.")
-        if data:
-            worksheet.append_rows(data)
-            print("Data uploaded to Google Sheets.")
         else:
             print("No data to upload.")
 
