@@ -21,4 +21,4 @@ def new_post(name, comment):
     worksheet.update_cell(1, 1, name) # (1, 1)の値をアップデートする
     worksheet.update_cell(1, 2, comment) # (1, 2)の値をアップデートする
 
-new_post("yama", "2021-07-01")
+new_post("yama", "2021-07-02")
