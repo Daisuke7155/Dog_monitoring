@@ -74,7 +74,7 @@ def update_behavior_data():
 
 # 尿分析データの更新関数
 def update_urine_data():
-    data = load_data_from_sheets("Urine Data")
+    data = load_data_from_sheets("CV")
     ph_data = load_data_from_sheets("pH")
     if data is not None:
         st.write(f"Urine data updated at {pd.Timestamp.now()}")
