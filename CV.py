@@ -40,7 +40,7 @@ def init_google_sheets():
         raise ValueError("SPREADSHEET_KEY is not set in the JSON file.")
 
     try:
-        worksheet = gc.open_by_key(spreadsheet_key).worksheet("pH")  # 正しいシート名に置き換える
+        worksheet = gc.open_by_key(spreadsheet_key).worksheet("CV")  # 正しいシート名に置き換える
         return worksheet
     except gspread.exceptions.SpreadsheetNotFound as e:
         print(f"Spreadsheet not found: {e}")
