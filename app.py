@@ -1,34 +1,52 @@
-import streamlit as st
+import os
+import json
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 import pandas as pd
+import streamlit as st
 import matplotlib.pyplot as plt
 import requests
 from PIL import Image
 from io import BytesIO
 
 # Google Sheetsからデータを読み込む関数
-def load_data(sheet_name):
+def load_data_from_sheets(sheet_name):
     try:
-        import gspread
-        from google.oauth2.service_account import Credentials
+        # 環境変数から認証情報を取得
+        credentials_info = os.getenv('GOOGLE_CREDENTIALS')
+        if not credentials_info:
+            st.error("GOOGLE_CREDENTIALS is not set.")
+            return None
 
-        # Google Sheets APIの認証情報を設定
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
-        client = gspread.authorize(creds)
+        credentials_info = json.loads(credentials_info)
 
-        # スプレッドシートからデータを取得
-        sheet = client.open("Dog Monitoring Data").worksheet(sheet_name)
-        data = sheet.get_all_records()
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
+        gc = gspread.authorize(credentials)
+
+        spreadsheet_key = os.getenv('SPREADSHEET_KEY')
+        if not spreadsheet_key:
+            st.error("SPREADSHEET_KEY is not set.")
+            return None
+
+        st.write(f"Loading data from sheet: {sheet_name}")  # Debug message
+        worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
+        data = worksheet.get_all_records()
+        if not data:
+            st.error(f"No data found in sheet: {sheet_name}")
+            return None
         df = pd.DataFrame(data)
         return df
-
+    except gspread.exceptions.SpreadsheetNotFound:
+        st.error("Spreadsheet not found. Please check the spreadsheet key and ensure the service account has access.")
+        return None
     except Exception as e:
         st.error(f"Error loading data from Google Sheets: {e}")
         return None
 
 # 行動データの更新関数
 def update_behavior_data():
-    data = load_data("Behavior Data")
+    data = load_data_from_sheets("Behavior Data")
     if data is not None:
         st.write(f"Behavior data updated at {pd.Timestamp.now()}")
 
@@ -56,7 +74,7 @@ def update_behavior_data():
 
 # 尿分析データの更新関数
 def update_urine_data():
-    data = load_data("Urine Data")
+    data = load_data_from_sheets("Urine Data")
     if data is not None:
         st.write(f"Urine data updated at {pd.Timestamp.now()}")
         plot_urine_analysis(data)
@@ -64,8 +82,8 @@ def update_urine_data():
 
 # 行動回数をカウントする関数
 def count_actions(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
     
     actions = ['drinking', 'defecating', 'urinating', 'awake']
@@ -74,16 +92,27 @@ def count_actions(data):
     for action in actions:
         action_data = data[data['Action'] == action]
         if not action_data.empty:
-            action_counts[action] = action_data.shape[0]
+            action_data = action_data.sort_values('Start time').reset_index(drop=True)
+            action_count = 0
+            ongoing = False
+            for i in range(len(action_data)):
+                if action_data.loc[i, 'Duration (s)'] >= 1:
+                    if not ongoing:
+                        action_count += 1
+                        ongoing = True
+                    else:
+                        if i > 0 and (action_data.loc[i, 'Start time'] - action_data.loc[i-1, 'End time']).total_seconds() > 0.5:
+                            action_count += 1
+            action_counts[action] = action_count
 
     return action_counts
 
 # 行動回数を日付ごとにプロットする関数
 def plot_action_counts_over_time(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
-    data['Date'] = data['Start Time'].dt.date
+    data['Date'] = data['Start time'].dt.date
     
     actions = ['drinking', 'defecating', 'urinating', 'awake']
     action_counts = {action: [] for action in actions}
@@ -106,27 +135,10 @@ def plot_action_counts_over_time(data):
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
-# 行動時間の合計をプロットする関数
-def plot_action_durations(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
-    data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
-
-    # 行動ごとの合計時間を計算
-    action_durations = data.groupby('Action')['Duration (s)'].sum()
-
-    fig, ax = plt.subplots()
-    action_durations.plot(kind='bar', ax=ax, color='skyblue')
-    plt.xlabel('Action')
-    plt.ylabel('Total Duration (s)')
-    plt.title('Total Duration of Each Action Over the Day')
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 各行動の積算時間を計算
@@ -136,8 +148,8 @@ def plot_cumulative_action_durations(data):
     fig, ax = plt.subplots()
     for action in cumulative_data['Action'].unique():
         action_data = cumulative_data[cumulative_data['Action'] == action]
-        action_data = action_data.sort_values('Start Time')
-        ax.plot(action_data['Start Time'], action_data['Cumulative Duration (s)'], label=action)
+        action_data = action_data.sort_values('Start time')
+        ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
 
     plt.xlabel('Time')
     plt.ylabel('Cumulative Duration (s)')
@@ -148,7 +160,6 @@ def plot_cumulative_action_durations(data):
 
 # 尿分析データをプロットする関数（仮の内容）
 def plot_urine_analysis(data):
-    # データの仮の処理とプロット
     st.subheader('Urine Analysis Data')
     st.write("Plotting urine analysis data is not yet implemented.")
 
