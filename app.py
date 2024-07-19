@@ -12,12 +12,23 @@ from io import BytesIO
 # Google Sheetsからデータを読み込む関数
 def load_data_from_sheets(sheet_name):
     try:
+        # 環境変数から認証情報を取得
+        credentials_info = os.getenv('GOOGLE_CREDENTIALS')
+        if not credentials_info:
+            st.error("GOOGLE_CREDENTIALS is not set.")
+            return None
+
+        credentials_info = json.loads(credentials_info)
+
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        credentials_info = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
         gc = gspread.authorize(credentials)
 
         spreadsheet_key = os.getenv('SPREADSHEET_KEY')
+        if not spreadsheet_key:
+            st.error("SPREADSHEET_KEY is not set.")
+            return None
+
         worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
         data = worksheet.get_all_records()
         df = pd.DataFrame(data)
