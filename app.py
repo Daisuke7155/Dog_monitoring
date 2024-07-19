@@ -78,8 +78,8 @@ def update_urine_data():
 
 # 行動回数をカウントする関数
 def count_actions(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
     
     actions = ['drinking', 'defecating', 'urinating']
@@ -88,7 +88,7 @@ def count_actions(data):
     for action in actions:
         action_data = data[data['Action'] == action]
         if not action_data.empty:
-            action_data = action_data.sort_values('Start Time').reset_index(drop=True)
+            action_data = action_data.sort_values('Start time').reset_index(drop=True)
             action_count = 0
             ongoing = False
             for i in range(len(action_data)):
@@ -97,7 +97,7 @@ def count_actions(data):
                         action_count += 1
                         ongoing = True
                     else:
-                        if i > 0 and (action_data.loc[i, 'Start Time'] - action_data.loc[i-1, 'End Time']).total_seconds() > 0.5:
+                        if i > 0 and (action_data.loc[i, 'Start time'] - action_data.loc[i-1, 'End time']).total_seconds() > 0.5:
                             action_count += 1
             action_counts[action] = action_count
 
@@ -105,10 +105,10 @@ def count_actions(data):
 
 # 行動回数を日付ごとにプロットする関数
 def plot_action_counts_over_time(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
-    data['Date'] = data['Start Time'].dt.date
+    data['Date'] = data['Start time'].dt.date
     
     actions = ['drinking', 'defecating', 'urinating']
     action_counts = {action: [] for action in actions}
@@ -133,8 +133,8 @@ def plot_action_counts_over_time(data):
 
 # 行動時間の合計をプロットする関数
 def plot_action_durations(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 行動ごとの合計時間を計算
@@ -142,8 +142,8 @@ def plot_action_durations(data):
 
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
-    data['Start Time'] = pd.to_datetime(data['Start Time'])
-    data['End Time'] = pd.to_datetime(data['End Time'])
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 各行動の積算時間を計算
@@ -153,8 +153,8 @@ def plot_cumulative_action_durations(data):
     fig, ax = plt.subplots()
     for action in cumulative_data['Action'].unique():
         action_data = cumulative_data[cumulative_data['Action'] == action]
-        action_data = action_data.sort_values('Start Time')
-        ax.plot(action_data['Start Time'], action_data['Cumulative Duration (s)'], label=action)
+        action_data = action_data.sort_values('Start time')
+        ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
 
     plt.xlabel('Time')
     plt.ylabel('Cumulative Duration (s)')
