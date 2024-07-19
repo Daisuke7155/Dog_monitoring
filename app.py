@@ -1,26 +1,23 @@
-import streamlit as st
+import os
+import json
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 import pandas as pd
+import streamlit as st
 import matplotlib.pyplot as plt
 import requests
 from PIL import Image
 from io import BytesIO
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import json
 
 # Google Sheetsからデータを読み込む関数
 def load_data_from_sheets(sheet_name):
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        credentials_path = './config/dogmonitoring-92d60377d8b3.json'
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
+        credentials_info = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
         gc = gspread.authorize(credentials)
 
-        # スプレッドシートキーを外部ファイルから読み込む
-        with open('./config/spreadsheet_key.json', 'r') as key_file:
-            key_data = json.load(key_file)
-            spreadsheet_key = key_data['SPREADSHEET_KEY']
-
+        spreadsheet_key = os.getenv('SPREADSHEET_KEY')
         worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
         data = worksheet.get_all_records()
         df = pd.DataFrame(data)
@@ -132,14 +129,6 @@ def plot_action_durations(data):
     # 行動ごとの合計時間を計算
     action_durations = data.groupby('Action')['Duration (s)'].sum()
 
-    # fig, ax = plt.subplots()
-    # action_durations.plot(kind='bar', ax=ax, color='skyblue')
-    # plt.xlabel('Action')
-    # plt.ylabel('Total Duration (s)')
-    # plt.title('Total Duration of Each Action Over the Day')
-    # plt.xticks(rotation=45)
-    # st.pyplot(fig)
-
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
     data['Start Time'] = pd.to_datetime(data['Start Time'])
@@ -165,7 +154,6 @@ def plot_cumulative_action_durations(data):
 
 # 尿分析データをプロットする関数（仮の内容）
 def plot_urine_analysis(data):
-    # データの仮の処理とプロット
     st.subheader('Urine Analysis Data')
     st.write("Plotting urine analysis data is not yet implemented.")
 
@@ -176,8 +164,7 @@ def display_real_time_video():
     if run:
         stframe = st.empty()
         while True:
-            # Raspberry PiからMJPEGストリームを取得
-            stream_url = "http://<Raspberry_Pi_IP>:8080/?action=stream"  # <Raspberry_Pi_IP>をRaspberry PiのIPアドレスに置き換えてください
+            stream_url = "http://<Raspberry_Pi_IP>:8080/?action=stream"
             response = requests.get(stream_url, stream=True)
             if response.status_code == 200:
                 bytes_data = b''
@@ -196,7 +183,6 @@ def display_real_time_video():
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
 
-# サイドバーにページのリンクを追加
 page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary Analysis", "Real-Time Video"])
 
 if page == "Home":
