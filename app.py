@@ -86,7 +86,7 @@ def update_urine_data():
         plot_ph_analysis(ph_data)
         st.dataframe(ph_data)
     if color_data is not None:
-        st.write(f"Color data updated at {pd.Timestamp.now()}")
+        st.write(f"Urine color data updated at {pd.Timestamp.now()}")
         plot_urine_color_analysis(color_data)
         st.dataframe(color_data)
 
@@ -205,21 +205,25 @@ def plot_ph_analysis(data):
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
-# 尿の色データをプロットする関数
+# 尿色分析データをプロットする関数
 def plot_urine_color_analysis(data):
     data['date'] = pd.to_datetime(data['date'])
 
-    color_mapping = {color: idx for idx, color in enumerate(data['color'].unique())}
-    data['color_code'] = data['color'].map(color_mapping)
-
     fig, ax = plt.subplots()
-    ax.plot(data['date'], data['color_code'], 'o-')
+    ax.plot(data['date'], data['color'], 'o-')
     
     plt.xlabel('Date')
     plt.ylabel('Color')
     plt.title('Urine Color Over Time')
     plt.xticks(rotation=45)
     st.pyplot(fig)
+
+    # 画像表示
+    image_folder = './urine'
+    st.markdown("### Urine Color Images")
+    for index, row in data.iterrows():
+        image_path = os.path.join(image_folder, row['color'])
+        st.image(image_path, caption=f"{row['date']}: {row['color']}", use_column_width=True)
 
 # リアルタイム動画を表示する関数
 def display_real_time_video():
