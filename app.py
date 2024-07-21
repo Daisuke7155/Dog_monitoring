@@ -76,7 +76,7 @@ def update_behavior_data():
 def update_urine_data():
     data = load_data_from_sheets("CV")
     ph_data = load_data_from_sheets("pH")
-    color_data = load_data_from_sheets("urine_color")
+    color_data = load_data_from_sheets("urine color")
     if data is not None:
         st.write(f"Urine data updated at {pd.Timestamp.now()}")
         plot_urine_analysis(data)
