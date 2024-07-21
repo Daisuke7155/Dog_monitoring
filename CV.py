@@ -4,6 +4,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
+import statistics
 
 class DFRobot_EC:
     def __init__(self):
@@ -20,8 +21,8 @@ class DFRobot_EC:
 def init_google_sheets():
     # Google 認証情報とスプレッドシートキーのファイルパス
     credentials_path = './config/dogmonitoring-92d60377d8b3.json'
-    spreadsheet_key = 'your_spreadsheet_key_here'
-    
+    spreadsheet_key_path = './config/spreadsheet_key.json'
+
     # 認証情報のJSONファイルを読み込む
     with open(credentials_path) as f:
         credentials_info = json.load(f)
@@ -30,16 +31,33 @@ def init_google_sheets():
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
     gc = gspread.authorize(credentials)
 
-    worksheet = gc.open_by_key(spreadsheet_key).worksheet("pH")
-    return worksheet
+    # スプレッドシートキーの JSON ファイルを読み込む
+    with open(spreadsheet_key_path) as f:
+        spreadsheet_key_data = json.load(f)
+        spreadsheet_key = spreadsheet_key_data.get('SPREADSHEET_KEY')
 
+    if not spreadsheet_key:
+        raise ValueError("SPREADSHEET_KEY is not set in the JSON file.")
+
+    try:
+        worksheet = gc.open_by_key(spreadsheet_key).worksheet("CV")  # 正しいシート名に置き換える
+        return worksheet
+    except gspread.exceptions.SpreadsheetNotFound as e:
+        print(f"Spreadsheet not found: {e}")
+        raise
+    except gspread.exceptions.WorksheetNotFound as e:
+        print(f"Worksheet not found: {e}")
+        raise
+
+>>>>>>> cf37fc4870d4ac479dee9d322f0cb011e3df75e6
 # MCP3008 の CH0 ピンに接続されたアナログセンサーを読み取る
 adc = MCP3008(channel=0)
 ec = DFRobot_EC()
 
 def main():
     worksheet = init_google_sheets()
-    data = []
+    temperature_data = []
+    ec_data = []
 
     print("Press 'f' to finish measuring and upload data.")
 
@@ -61,9 +79,12 @@ def main():
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
-        if data:
-            worksheet.append_rows(data)
-            print("Data uploaded to Google Sheets.")
+        if temperature_data and ec_data:
+            avg_temperature = statistics.mean(temperature_data)
+            avg_ecValue = statistics.mean(ec_data)
+            timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+            worksheet.append_row([timestamp, avg_temperature, avg_ecValue])
+            print("Average data uploaded to Google Sheets.")
         else:
             print("No data to upload.")
 

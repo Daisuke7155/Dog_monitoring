@@ -74,11 +74,16 @@ def update_behavior_data():
 
 # 尿分析データの更新関数
 def update_urine_data():
-    data = load_data_from_sheets("Urine Data")
+    data = load_data_from_sheets("CV")
+    ph_data = load_data_from_sheets("pH")
     if data is not None:
         st.write(f"Urine data updated at {pd.Timestamp.now()}")
         plot_urine_analysis(data)
         st.dataframe(data)
+    if ph_data is not None:
+        st.write(f"pH data updated at {pd.Timestamp.now()}")
+        plot_ph_analysis(ph_data)
+        st.dataframe(ph_data)
 
 # 行動回数をカウントする関数
 def count_actions(data):
@@ -135,18 +140,24 @@ def plot_action_counts_over_time(data):
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
+# 行動時間の合計をプロットする関数
+def plot_action_durations(data):
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['End time'] = pd.to_datetime(data['End time'])
+    data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
+
+    # 行動ごとの合計時間を計算
+    action_durations = data.groupby('Action')['Duration (s)'].sum()
+
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
     data['Start time'] = pd.to_datetime(data['Start time'])
     data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
-    # 同じ時刻の Duration (s) を合計
-    data = data.groupby(['Action', 'Start time']).agg({'Duration (s)': 'sum'}).reset_index()
-
     # 各行動の積算時間を計算
     cumulative_data = data.copy()
-    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
+    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Start time')['Duration (s)'].cumsum()
 
     fig, ax = plt.subplots()
     for action in cumulative_data['Action'].unique():
@@ -161,10 +172,33 @@ def plot_cumulative_action_durations(data):
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
-# 尿分析データをプロットする関数（仮の内容）
+# 尿分析データをプロットする関数
 def plot_urine_analysis(data):
-    st.subheader('Urine Analysis Data')
-    st.write("Plotting urine analysis data is not yet implemented.")
+    data['time'] = pd.to_datetime(data['time'])
+    data['cv [mS/m]'] = pd.to_numeric(data['cv [mS/m]'])
+
+    fig, ax = plt.subplots()
+    ax.plot(data['time'], data['cv [mS/m]'], 'o-')
+    
+    plt.xlabel('Time')
+    plt.ylabel('Conductivity (mS/m)')
+    plt.title('Urine Conductivity Over Time')
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+
+# pH分析データをプロットする関数
+def plot_ph_analysis(data):
+    data['time'] = pd.to_datetime(data['time'])
+    data['pH'] = pd.to_numeric(data['pH'])
+
+    fig, ax = plt.subplots()
+    ax.plot(data['time'], data['pH'], 'o-')
+    
+    plt.xlabel('Time')
+    plt.ylabel('pH')
+    plt.title('Urine pH Over Time')
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
 # リアルタイム動画を表示する関数
 def display_real_time_video():
