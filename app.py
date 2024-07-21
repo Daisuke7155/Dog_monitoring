@@ -208,10 +208,12 @@ def plot_ph_analysis(data):
 # 尿の色データをプロットする関数
 def plot_urine_color_analysis(data):
     data['date'] = pd.to_datetime(data['date'])
-    data['color'] = data['color'].astype('category').cat.codes
+
+    color_mapping = {color: idx for idx, color in enumerate(data['color'].unique())}
+    data['color_code'] = data['color'].map(color_mapping)
 
     fig, ax = plt.subplots()
-    ax.plot(data['date'], data['color'], 'o-')
+    ax.plot(data['date'], data['color_code'], 'o-')
     
     plt.xlabel('Date')
     plt.ylabel('Color')
