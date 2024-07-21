@@ -49,6 +49,7 @@ def init_google_sheets():
         print(f"Worksheet not found: {e}")
         raise
 
+>>>>>>> cf37fc4870d4ac479dee9d322f0cb011e3df75e6
 # MCP3008 の CH0 ピンに接続されたアナログセンサーを読み取る
 adc = MCP3008(channel=0)
 ec = DFRobot_EC()
@@ -69,8 +70,7 @@ def main():
             print(f"Temperature: {temperature:.1f} °C")
             print(f"EC: {ecValue:.2f} mS/m")
 
-            temperature_data.append(temperature)
-            ec_data.append(ecValue)
+            data.append([time.strftime('%Y-%m-%d %H:%M:%S'), temperature, ecValue])
 
             ec.calibration(voltage, temperature)
             time.sleep(1)
