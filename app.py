@@ -223,7 +223,10 @@ def plot_urine_color_analysis(data):
     st.markdown("### Urine Color Images")
     for index, row in data.iterrows():
         image_path = os.path.join(image_folder, row['color'])
-        st.image(image_path, caption=f"{row['date']}: {row['color']}", use_column_width=True)
+        if os.path.exists(image_path):
+            st.image(image_path, caption=f"{row['date']}: {row['color']}", use_column_width=True)
+        else:
+            st.warning(f"Image not found: {image_path}")
 
 # リアルタイム動画を表示する関数
 def display_real_time_video():
