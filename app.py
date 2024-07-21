@@ -76,6 +76,7 @@ def update_behavior_data():
 def update_urine_data():
     data = load_data_from_sheets("CV")
     ph_data = load_data_from_sheets("pH")
+    color_data = load_data_from_sheets("urine_color")
     if data is not None:
         st.write(f"Urine data updated at {pd.Timestamp.now()}")
         plot_urine_analysis(data)
@@ -84,6 +85,10 @@ def update_urine_data():
         st.write(f"pH data updated at {pd.Timestamp.now()}")
         plot_ph_analysis(ph_data)
         st.dataframe(ph_data)
+    if color_data is not None:
+        st.write(f"Color data updated at {pd.Timestamp.now()}")
+        plot_urine_color_analysis(color_data)
+        st.dataframe(color_data)
 
 # 行動回数をカウントする関数
 def count_actions(data):
@@ -197,6 +202,20 @@ def plot_ph_analysis(data):
     plt.xlabel('Time')
     plt.ylabel('pH')
     plt.title('Urine pH Over Time')
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+
+# 尿の色データをプロットする関数
+def plot_urine_color_analysis(data):
+    data['date'] = pd.to_datetime(data['date'])
+    data['color'] = data['color'].astype('category').cat.codes
+
+    fig, ax = plt.subplots()
+    ax.plot(data['date'], data['color'], 'o-')
+    
+    plt.xlabel('Date')
+    plt.ylabel('Color')
+    plt.title('Urine Color Over Time')
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
