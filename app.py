@@ -31,10 +31,7 @@ def load_data_from_sheets(sheet_name):
 
         st.write(f"Loading data from sheet: {sheet_name}")  # Debug message
         worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
-        
-        # ここでexpected_headersを渡す
-        data = worksheet.get_all_records(expected_headers=["date", "color"])
-        
+        data = worksheet.get_all_records()
         if not data:
             st.error(f"No data found in sheet: {sheet_name}")
             return None
