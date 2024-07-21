@@ -31,7 +31,10 @@ def load_data_from_sheets(sheet_name):
 
         st.write(f"Loading data from sheet: {sheet_name}")  # Debug message
         worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
-        data = worksheet.get_all_records()
+        
+        # ここでexpected_headersを渡す
+        data = worksheet.get_all_records(expected_headers=["date", "color"])
+        
         if not data:
             st.error(f"No data found in sheet: {sheet_name}")
             return None
@@ -76,7 +79,7 @@ def update_behavior_data():
 def update_urine_data():
     data = load_data_from_sheets("CV")
     ph_data = load_data_from_sheets("pH")
-    color_data = load_data_from_sheets("urine color")
+    color_data = load_data_from_sheets("urine_color")
     if data is not None:
         st.write(f"Urine data updated at {pd.Timestamp.now()}")
         plot_urine_analysis(data)
