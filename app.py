@@ -196,9 +196,14 @@ def plot_urine_analysis(data):
     fig, ax = plt.subplots()
     ax.plot(data['time'], data['cv [mS/m]'], 'o-')
     
+    # 正常範囲の閾値を追加
+    ax.axhline(y=10, color='g', linestyle='--', label='Lower Threshold (10 mS/m)')
+    ax.axhline(y=340, color='r', linestyle='--', label='Upper Threshold (340 mS/m)')
+    
     plt.xlabel('Time')
     plt.ylabel('Conductivity (mS/m)')
     plt.title('Urine Conductivity Over Time')
+    plt.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
@@ -210,9 +215,14 @@ def plot_ph_analysis(data):
     fig, ax = plt.subplots()
     ax.plot(data['time'], data['pH'], 'o-')
     
+    # 正常範囲の閾値を追加
+    ax.axhline(y=6.0, color='g', linestyle='--', label='Lower Threshold (6.0)')
+    ax.axhline(y=7.0, color='r', linestyle='--', label='Upper Threshold (7.0)')
+    
     plt.xlabel('Time')
     plt.ylabel('pH')
     plt.title('Urine pH Over Time')
+    plt.legend()
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
