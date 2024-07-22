@@ -70,6 +70,11 @@ def update_behavior_data():
         
         st.markdown("---")
         
+        st.markdown("### Daily Action Counts")
+        plot_daily_action_counts(data)
+        
+        st.markdown("---")
+        
         st.markdown("### Raw Data")
         st.dataframe(data)
 
@@ -143,6 +148,22 @@ def plot_action_counts_over_time(data):
     plt.ylabel('Count')
     plt.title('Count of Each Action Over Time')
     plt.legend()
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+
+# 行動回数を日付ごとに集計してプロットする関数
+def plot_daily_action_counts(data):
+    data['Start time'] = pd.to_datetime(data['Start time'])
+    data['Date'] = data['Start time'].dt.date
+
+    daily_counts = data.groupby(['Date', 'Action']).size().unstack(fill_value=0)
+
+    fig, ax = plt.subplots()
+    daily_counts.plot(ax=ax, kind='bar', stacked=True)
+    
+    plt.xlabel('Date')
+    plt.ylabel('Count')
+    plt.title('Daily Action Counts')
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
