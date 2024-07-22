@@ -261,7 +261,11 @@ def plot_urine_color_analysis(data):
         if os.path.isfile(image_path):
             st.image(image_path, caption=image_file, use_column_width=True)
 
-# リアルタイム動画を表示する関数
+import streamlit as st
+import requests
+from PIL import Image
+from io import BytesIO
+
 def display_real_time_video():
     st.subheader('Real-Time Video Feed')
     run = st.checkbox('Run')
@@ -269,7 +273,7 @@ def display_real_time_video():
         stframe = st.empty()
         # グローバルIPアドレスとポートを設定します
         stream_url = "http://60.103.45.17:8080/?action=stream"
-        while True:
+        while run:
             try:
                 response = requests.get(stream_url, stream=True, timeout=10)
                 if response.status_code == 200:
