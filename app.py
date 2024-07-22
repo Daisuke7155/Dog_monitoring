@@ -267,23 +267,28 @@ def display_real_time_video():
     run = st.checkbox('Run')
     if run:
         stframe = st.empty()
+        # グローバルIPアドレスとポートを設定します
+        stream_url = "60.103.45.17:8080/?action=stream"
         while True:
-            # Raspberry PiからMJPEGストリームを取得
-            stream_url = "http://192.168.2.108:8080/?action=stream"  # <Raspberry_Pi_IP>をRaspberry PiのIPアドレスに置き換えてください
-            response = requests.get(stream_url, stream=True)
-            if response.status_code == 200:
-                bytes_data = b''
-                for chunk in response.iter_content(chunk_size=1024):
-                    bytes_data += chunk
-                    a = bytes_data.find(b'\xff\xd8')
-                    b = bytes_data.find(b'\xff\xd9')
-                    if a != -1 and b != -1:
-                        jpg = bytes_data[a:b+2]
-                        bytes_data = bytes_data[b+2:]
-                        img = Image.open(BytesIO(jpg))
-                        stframe.image(img, use_column_width=True)
-            else:
-                st.write("Failed to get video stream")
+            try:
+                response = requests.get(stream_url, stream=True, timeout=10)
+                if response.status_code == 200:
+                    bytes_data = b''
+                    for chunk in response.iter_content(chunk_size=1024):
+                        bytes_data += chunk
+                        a = bytes_data.find(b'\xff\xd8')
+                        b = bytes_data.find(b'\xff\xd9')
+                        if a != -1 and b != -1:
+                            jpg = bytes_data[a:b+2]
+                            bytes_data = bytes_data[b+2:]
+                            img = Image.open(BytesIO(jpg))
+                            stframe.image(img, use_column_width=True)
+                else:
+                    st.write(f"Failed to get video stream. Status code: {response.status_code}")
+                    break
+            except requests.exceptions.RequestException as e:
+                st.write(f"Error connecting to the video stream: {e}")
+                break
 
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
