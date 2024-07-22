@@ -54,19 +54,12 @@ def update_behavior_data():
         st.markdown("## 📊 Behavior Analysis")
         
         st.markdown("### Count of Specific Actions")
-        action_counts = count_actions(data)
-        for action, count in action_counts.items():
-            st.markdown(f"**{action.capitalize()}**: {count} times")
+        plot_action_counts_over_time(data)
         
         st.markdown("---")
         
         st.markdown("### Cumulative Duration of Each Action Over Time")
         plot_cumulative_action_durations(data)
-        
-        st.markdown("---")
-        
-        st.markdown("### Count of Each Action Over Time")
-        plot_action_counts_over_time(data)
         
         st.markdown("---")
         
@@ -128,30 +121,20 @@ def plot_action_counts_over_time(data):
     actions = ['drinking', 'defecating', 'urinating']
     action_counts = {action: [] for action in actions}
     dates = sorted(data['Date'].unique())
-    
-    for date in dates:
-        daily_data = data[data['Date'] == date]
-        daily_counts = count_actions(daily_data)
-        for action in actions:
-            action_counts[action].append(daily_counts[action])
+
+    selected_date = st.selectbox('Select date for action counts', dates, key="action_counts_date")
+    daily_data = data[data['Date'] == selected_date]
+    daily_counts = count_actions(daily_data)
     
     fig, ax = plt.subplots()
     for action in actions:
-        ax.plot(dates, action_counts[action], 'o-', label=action)  # ドットでプロット
+        ax.plot([selected_date], [daily_counts[action]], 'o-', label=action)  # ドットでプロット
     
     plt.xlabel('Date')
     plt.ylabel('Count')
     plt.title('Count of Each Action Over Time')
     plt.legend()
     plt.xticks(rotation=45)
-    
-    # グラフの範囲をスライダーで変更可能にする
-    min_date = min(dates)
-    max_date = max(dates)
-    start_date = st.slider('Start date for action counts', min_value=min_date, max_value=max_date, value=min_date, key="action_counts_start_date")
-    end_date = st.slider('End date for action counts', min_value=min_date, max_value=max_date, value=max_date, key="action_counts_end_date")
-    ax.set_xlim([start_date, end_date])
-
     st.pyplot(fig)
 
 # 行動時間の合計をプロットする関数
@@ -186,9 +169,13 @@ def plot_cumulative_action_durations(data):
     cumulative_data = data.groupby(['date', 'Start time', 'Action'])['Duration (s)'].sum().reset_index()
     cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby(['date', 'Action'])['Duration (s)'].cumsum()
 
+    dates = sorted(cumulative_data['date'].unique())
+    selected_date = st.selectbox('Select date for cumulative duration', dates, key="cumulative_duration_date")
+    date_data = cumulative_data[cumulative_data['date'] == selected_date]
+
     fig, ax = plt.subplots()
-    for action in cumulative_data['Action'].unique():
-        action_data = cumulative_data[cumulative_data['Action'] == action]
+    for action in date_data['Action'].unique():
+        action_data = date_data[date_data['Action'] == action]
         ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
 
     plt.xlabel('Time')
@@ -196,14 +183,6 @@ def plot_cumulative_action_durations(data):
     plt.title('Cumulative Duration of Each Action Over Time')
     plt.legend()
     plt.xticks(rotation=45)
-
-    # グラフの範囲をスライダーで変更可能にする
-    min_date = min(cumulative_data['Start time']).date()
-    max_date = max(cumulative_data['Start time']).date()
-    start_date = st.slider('Start date for cumulative duration', min_value=min_date, max_value=max_date, value=min_date, key="cumulative_duration_start_date")
-    end_date = st.slider('End date for cumulative duration', min_value=min_date, max_value=max_date, value=max_date, key="cumulative_duration_end_date")
-    ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
-
     st.pyplot(fig)
 
 # 尿分析データをプロットする関数
