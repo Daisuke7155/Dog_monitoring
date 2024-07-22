@@ -268,7 +268,7 @@ def display_real_time_video():
     if run:
         stframe = st.empty()
         # グローバルIPアドレスとポートを設定します
-        stream_url = "60.103.45.17:8080/?action=stream"
+        stream_url = "http://60.103.45.17:8080/?action=stream"
         while True:
             try:
                 response = requests.get(stream_url, stream=True, timeout=10)
