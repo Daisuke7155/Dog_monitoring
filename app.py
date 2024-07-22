@@ -151,7 +151,7 @@ def plot_action_durations(data):
     data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
-    # 同じ時間の行動を積算
+    # 開始時間が同じ時間のDuration (s)を積算
     summed_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().reset_index()
 
     fig, ax = plt.subplots()
@@ -173,13 +173,12 @@ def plot_cumulative_action_durations(data):
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 各行動の積算時間を計算
-    cumulative_data = data.copy()
-    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Start time')['Duration (s)'].cumsum()
+    cumulative_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().reset_index()
+    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
 
     fig, ax = plt.subplots()
     for action in cumulative_data['Action'].unique():
         action_data = cumulative_data[cumulative_data['Action'] == action]
-        action_data = action_data.sort_values('Start time')
         ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
 
     plt.xlabel('Time')
