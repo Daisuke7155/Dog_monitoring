@@ -182,8 +182,9 @@ def plot_cumulative_action_durations(data):
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 各行動の積算時間を計算
-    cumulative_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().reset_index()
-    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
+    data['date'] = data['Start time'].dt.date
+    cumulative_data = data.groupby(['date', 'Start time', 'Action'])['Duration (s)'].sum().reset_index()
+    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby(['date', 'Action'])['Duration (s)'].cumsum()
 
     fig, ax = plt.subplots()
     for action in cumulative_data['Action'].unique():
@@ -195,6 +196,14 @@ def plot_cumulative_action_durations(data):
     plt.title('Cumulative Duration of Each Action Over Time')
     plt.legend()
     plt.xticks(rotation=45)
+
+    # グラフの範囲をスライダーで変更可能にする
+    min_date = min(cumulative_data['Start time']).date()
+    max_date = max(cumulative_data['Start time']).date()
+    start_date = st.slider('Start date', min_value=min_date, max_value=max_date, value=min_date)
+    end_date = st.slider('End date', min_value=min_date, max_value=max_date, value=max_date)
+    ax.set_xlim([pd.Timestamp(start_date), pd.Timestamp(end_date) + pd.Timedelta(days=1)])
+
     st.pyplot(fig)
 
 # 尿分析データをプロットする関数
