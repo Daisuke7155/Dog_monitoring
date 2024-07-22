@@ -261,11 +261,6 @@ def plot_urine_color_analysis(data):
         if os.path.isfile(image_path):
             st.image(image_path, caption=image_file, use_column_width=True)
 
-import streamlit as st
-import requests
-from PIL import Image
-from io import BytesIO
-
 def display_real_time_video():
     st.subheader('Real-Time Video Feed')
     run = st.checkbox('Run')
@@ -275,7 +270,7 @@ def display_real_time_video():
         stream_url = "http://60.103.45.17:8080/?action=stream"
         while run:
             try:
-                response = requests.get(stream_url, stream=True, timeout=10)
+                response = requests.get(stream_url, stream=True, timeout=5)
                 if response.status_code == 200:
                     bytes_data = b''
                     for chunk in response.iter_content(chunk_size=1024):
@@ -287,12 +282,16 @@ def display_real_time_video():
                             bytes_data = bytes_data[b+2:]
                             img = Image.open(BytesIO(jpg))
                             stframe.image(img, use_column_width=True)
+                            break
                 else:
                     st.write(f"Failed to get video stream. Status code: {response.status_code}")
                     break
             except requests.exceptions.RequestException as e:
                 st.write(f"Error connecting to the video stream: {e}")
                 break
+            time.sleep(0.1)  # フレーム更新間隔を調整
+        else:
+            st.write("Stream stopped")
 
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
