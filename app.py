@@ -151,8 +151,20 @@ def plot_action_durations(data):
     data['End time'] = pd.to_datetime(data['End time'])
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
-    # 行動ごとの合計時間を計算
-    action_durations = data.groupby('Action')['Duration (s)'].sum()
+    # 同じ時間の行動を積算
+    summed_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().reset_index()
+
+    fig, ax = plt.subplots()
+    for action in summed_data['Action'].unique():
+        action_data = summed_data[summed_data['Action'] == action]
+        ax.plot(action_data['Start time'], action_data['Duration (s)'], 'o-', label=action)
+    
+    plt.xlabel('Time')
+    plt.ylabel('Total Duration (s)')
+    plt.title('Total Duration of Each Action Over Time')
+    plt.legend()
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
 # 各時刻に対する各行動の積算時間をプロットする関数
 def plot_cumulative_action_durations(data):
