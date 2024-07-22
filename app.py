@@ -269,7 +269,7 @@ def display_real_time_video():
         stframe = st.empty()
         while True:
             # Raspberry PiからMJPEGストリームを取得
-            stream_url = "http://<Raspberry_Pi_IP>:8080/?action=stream"  # <Raspberry_Pi_IP>をRaspberry PiのIPアドレスに置き換えてください
+            stream_url = "http://192.168.2.108:8080/?action=stream"  # <Raspberry_Pi_IP>をRaspberry PiのIPアドレスに置き換えてください
             response = requests.get(stream_url, stream=True)
             if response.status_code == 200:
                 bytes_data = b''
