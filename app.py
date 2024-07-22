@@ -201,6 +201,10 @@ def plot_urine_analysis(data):
     ax.axhline(y=10, color='g', linestyle='--', label='Lower Threshold (10 mS/m)')
     ax.axhline(y=340, color='r', linestyle='--', label='Upper Threshold (340 mS/m)')
     
+    # 日付と時間のフォーマット
+    date_form = DateFormatter("%Y-%m-%d %H:%M:%S")
+    ax.xaxis.set_major_formatter(date_form)
+    
     plt.xlabel('Time')
     plt.ylabel('Conductivity (mS/m)')
     plt.title('Urine Conductivity Over Time')
@@ -234,9 +238,14 @@ def plot_ph_analysis(data):
 # 尿色分析データをプロットする関数
 def plot_urine_color_analysis(data):
     data['date'] = pd.to_datetime(data['date'])
+    data['color'] = data['color'].str.replace('.jpg', '')
 
     fig, ax = plt.subplots()
     ax.plot(data['date'], data['color'], 'o-')
+    
+    # 日付と時間のフォーマット
+    date_form = DateFormatter("%Y-%m-%d %H:%M:%S")
+    ax.xaxis.set_major_formatter(date_form)
     
     plt.xlabel('Date')
     plt.ylabel('Color')
