@@ -5,6 +5,7 @@ import gspread
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
 import requests
 from PIL import Image
 from io import BytesIO
@@ -218,6 +219,10 @@ def plot_ph_analysis(data):
     # 正常範囲の閾値を追加
     ax.axhline(y=6.0, color='g', linestyle='--', label='Lower Threshold (6.0)')
     ax.axhline(y=7.0, color='r', linestyle='--', label='Upper Threshold (7.0)')
+    
+    # 日付と時間のフォーマット
+    date_form = DateFormatter("%Y-%m-%d %H:%M:%S")
+    ax.xaxis.set_major_formatter(date_form)
     
     plt.xlabel('Time')
     plt.ylabel('pH')
