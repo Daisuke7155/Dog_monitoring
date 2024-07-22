@@ -268,9 +268,9 @@ def display_real_time_video():
         stframe = st.empty()
         # グローバルIPアドレスとポートを設定します
         stream_url = "http://60.103.45.17:8080/?action=stream"
-        while run:
-            try:
-                response = requests.get(stream_url, stream=True, timeout=5)
+        try:
+            while run:
+                response = requests.get(stream_url, stream=True, timeout=10)
                 if response.status_code == 200:
                     bytes_data = b''
                     for chunk in response.iter_content(chunk_size=1024):
@@ -282,16 +282,12 @@ def display_real_time_video():
                             bytes_data = bytes_data[b+2:]
                             img = Image.open(BytesIO(jpg))
                             stframe.image(img, use_column_width=True)
-                            break
+                            break  # 次のフレームに進むためにループを抜ける
                 else:
-                    st.write(f"Failed to get video stream. Status code: {response.status_code}")
+                    st.error(f"Failed to get video stream. Status code: {response.status_code}")
                     break
-            except requests.exceptions.RequestException as e:
-                st.write(f"Error connecting to the video stream: {e}")
-                break
-            time.sleep(0.1)  # フレーム更新間隔を調整
-        else:
-            st.write("Stream stopped")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to the video stream: {e}")
 
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
