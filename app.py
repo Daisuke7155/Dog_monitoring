@@ -148,8 +148,8 @@ def plot_action_counts_over_time(data):
     # グラフの範囲をスライダーで変更可能にする
     min_date = min(dates)
     max_date = max(dates)
-    start_date = st.slider('Start date', min_value=min_date, max_value=max_date, value=min_date)
-    end_date = st.slider('End date', min_value=min_date, max_value=max_date, value=max_date)
+    start_date = st.slider('Start date for action counts', min_value=min_date, max_value=max_date, value=min_date, key="action_counts_start_date")
+    end_date = st.slider('End date for action counts', min_value=min_date, max_value=max_date, value=max_date, key="action_counts_end_date")
     ax.set_xlim([start_date, end_date])
 
     st.pyplot(fig)
@@ -200,9 +200,9 @@ def plot_cumulative_action_durations(data):
     # グラフの範囲をスライダーで変更可能にする
     min_date = min(cumulative_data['Start time']).date()
     max_date = max(cumulative_data['Start time']).date()
-    start_date = st.slider('Start date', min_value=min_date, max_value=max_date, value=min_date)
-    end_date = st.slider('End date', min_value=min_date, max_value=max_date, value=max_date)
-    ax.set_xlim([pd.Timestamp(start_date), pd.Timestamp(end_date) + pd.Timedelta(days=1)])
+    start_date = st.slider('Start date for cumulative duration', min_value=min_date, max_value=max_date, value=min_date, key="cumulative_duration_start_date")
+    end_date = st.slider('End date for cumulative duration', min_value=min_date, max_value=max_date, value=max_date, key="cumulative_duration_end_date")
+    ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
 
     st.pyplot(fig)
 
