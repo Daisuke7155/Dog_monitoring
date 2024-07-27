@@ -30,7 +30,6 @@ def load_data_from_sheets(sheet_name):
             st.error("SPREADSHEET_KEY is not set.")
             return None
 
-        st.write(f"Loading data from sheet: {sheet_name}")  # Debug message
         worksheet = gc.open_by_key(spreadsheet_key).worksheet(sheet_name)
         data = worksheet.get_all_records()
         if not data:
@@ -126,9 +125,11 @@ def plot_action_counts_over_time(data):
     daily_data = data[data['Date'] == selected_date]
     daily_counts = count_actions(daily_data)
     
+    selected_date = st.selectbox("Select a Date", dates)
+    
     fig, ax = plt.subplots()
     for action in actions:
-        ax.plot([selected_date], [daily_counts[action]], 'o-', label=action)  # ドットでプロット
+        ax.plot(dates, action_counts[action], 'o-', label=action)  # ドットでプロット
     
     plt.xlabel('Date')
     plt.ylabel('Count')
@@ -165,17 +166,12 @@ def plot_cumulative_action_durations(data):
     data['Duration (s)'] = pd.to_numeric(data['Duration (s)'])
 
     # 各行動の積算時間を計算
-    data['date'] = data['Start time'].dt.date
-    cumulative_data = data.groupby(['date', 'Start time', 'Action'])['Duration (s)'].sum().reset_index()
-    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby(['date', 'Action'])['Duration (s)'].cumsum()
-
-    dates = sorted(cumulative_data['date'].unique())
-    selected_date = st.selectbox('Select date for cumulative duration', dates, key="cumulative_duration_date")
-    date_data = cumulative_data[cumulative_data['date'] == selected_date]
+    cumulative_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().reset_index()
+    cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
 
     fig, ax = plt.subplots()
-    for action in date_data['Action'].unique():
-        action_data = date_data[date_data['Action'] == action]
+    for action in cumulative_data['Action'].unique():
+        action_data = cumulative_data[cumulative_data['Action'] == action]
         ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
 
     plt.xlabel('Time')
