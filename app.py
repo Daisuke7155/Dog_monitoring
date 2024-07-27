@@ -53,25 +53,28 @@ def update_behavior_data():
 
         st.markdown("## 📊 Behavior Analysis")
         
+        selected_date = st.selectbox("Select a Date", data['Start time'].str[:10].unique())
+        filtered_data = data[data['Start time'].str.contains(selected_date)]
+
         st.markdown("### Count of Specific Actions")
-        action_counts = count_actions(data)
+        action_counts = count_actions(filtered_data)
         for action, count in action_counts.items():
             st.markdown(f"**{action.capitalize()}**: {count} times")
         
         st.markdown("---")
         
         st.markdown("### Cumulative Duration of Each Action Over Time")
-        plot_cumulative_action_durations(data)
+        plot_cumulative_action_durations(filtered_data)
         
         st.markdown("---")
         
         st.markdown("### Count of Each Action Over Time")
-        plot_action_counts_over_time(data)
+        plot_action_counts_over_time(filtered_data)
         
         st.markdown("---")
         
         st.markdown("### Raw Data")
-        st.dataframe(data)
+        st.dataframe(filtered_data)
 
 # 尿分析データの更新関数
 def update_urine_data():
@@ -300,11 +303,9 @@ if page == "Home":
     st.image("home.png", caption="Home Image")
 elif page == "Behavior Analysis":
     st.write("Behavior Analysis")
-    if st.button('Update Behavior Data'):
-        update_behavior_data()
+    update_behavior_data()
 elif page == "Urinary Analysis":
     st.write("This section provides an analysis of the dog's urine data.")
-    if st.button('Update Urine Data'):
-        update_urine_data()
+    update_urine_data()
 elif page == "Real-Time Video":
     display_real_time_video()
