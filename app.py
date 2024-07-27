@@ -69,12 +69,12 @@ def update_behavior_data():
         st.markdown("---")
         
         st.markdown("### Count of Each Action Over Time")
-        plot_action_counts_over_time(filtered_data)
+        plot_action_counts_over_time(data)
         
         st.markdown("---")
         
         st.markdown("### Raw Data")
-        st.dataframe(filtered_data)
+        st.dataframe(data)
 
 # 尿分析データの更新関数
 def update_urine_data():
