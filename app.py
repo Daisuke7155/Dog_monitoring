@@ -53,12 +53,19 @@ def update_behavior_data():
         st.markdown("## 📊 Behavior Analysis")
         
         st.markdown("### Count of Specific Actions")
-        plot_action_counts_over_time(data)
+        action_counts = count_actions(data)
+        for action, count in action_counts.items():
+            st.markdown(f"**{action.capitalize()}**: {count} times")
         
         st.markdown("---")
         
         st.markdown("### Cumulative Duration of Each Action Over Time")
         plot_cumulative_action_durations(data)
+        
+        st.markdown("---")
+        
+        st.markdown("### Count of Each Action Over Time")
+        plot_action_counts_over_time(data)
         
         st.markdown("---")
         
@@ -120,16 +127,21 @@ def plot_action_counts_over_time(data):
     actions = ['drinking', 'defecating', 'urinating']
     action_counts = {action: [] for action in actions}
     dates = sorted(data['Date'].unique())
-
-    selected_date = st.selectbox('Select date for action counts', dates, key="action_counts_date")
-    daily_data = data[data['Date'] == selected_date]
-    daily_counts = count_actions(daily_data)
+    
+    for date in dates:
+        daily_data = data[data['Date'] == date]
+        daily_counts = count_actions(daily_data)
+        for action in actions:
+            action_counts[action].append(daily_counts[action])
     
     selected_date = st.selectbox("Select a Date", dates)
     
+    filtered_data = data[data['Date'] == selected_date]
+    
     fig, ax = plt.subplots()
     for action in actions:
-        ax.plot(dates, action_counts[action], 'o-', label=action)  # ドットでプロット
+        action_data = filtered_data[filtered_data['Action'] == action]
+        ax.plot(action_data['Start time'], action_data['Duration (s)'], 'o-', label=action)
     
     plt.xlabel('Date')
     plt.ylabel('Count')
@@ -169,9 +181,16 @@ def plot_cumulative_action_durations(data):
     cumulative_data = data.groupby(['Start time', 'Action'])['Duration (s)'].sum().reset_index()
     cumulative_data['Cumulative Duration (s)'] = cumulative_data.groupby('Action')['Duration (s)'].cumsum()
 
+    selected_date = st.selectbox("Select a Date for Cumulative Duration", sorted(data['Start time'].dt.date.unique()))
+
+    filtered_data = data[data['Start time'].dt.date == selected_date]
+
+    # 日付が変わるたびにリセット
+    filtered_data['Cumulative Duration (s)'] = filtered_data.groupby('Action')['Duration (s)'].cumsum()
+
     fig, ax = plt.subplots()
-    for action in cumulative_data['Action'].unique():
-        action_data = cumulative_data[cumulative_data['Action'] == action]
+    for action in filtered_data['Action'].unique():
+        action_data = filtered_data[filtered_data['Action'] == action]
         ax.plot(action_data['Start time'], action_data['Cumulative Duration (s)'], label=action)
 
     plt.xlabel('Time')
