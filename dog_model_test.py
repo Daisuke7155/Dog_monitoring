@@ -13,7 +13,7 @@ class PetBehaviorDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.classes = ['drinking', 'barking','sleeping', 'awake', 'defecating', 'urinating']
+        self.classes = ['sleeping', 'awake', 'defecating', 'urinating']
         self.data = []
         for class_name in self.classes:
             class_dir = os.path.join(root_dir, class_name)
@@ -54,7 +54,7 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 # CNNモデルの定義
 class SimpleCNN(nn.Module):
-    def __init__(self, num_classes=6):  # クラス数を6に変更
+    def __init__(self, num_classes=4):  # クラス数を6に変更
         super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
@@ -71,7 +71,7 @@ class SimpleCNN(nn.Module):
         return x
 
 # モデルのトレーニング
-model = SimpleCNN(num_classes=6)
+model = SimpleCNN(num_classes=4)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -107,8 +107,8 @@ with torch.no_grad():
 print(f'Accuracy of the network on the {total} test images: {100 * correct / total:.2f}%')
 
 # 各クラスごとの精度を計算するための準備
-class_correct = [0] * 6
-class_total = [0] * 6
+class_correct = [0] * 4
+class_total = [0] * 4
 
 model.eval()  # モデルを評価モードに設定
 all_labels = []
@@ -128,7 +128,7 @@ with torch.no_grad():
         all_preds.extend(predicted.cpu().numpy())
 
 # 各クラスごとの精度を表示
-for i in range(6):
+for i in range(4):
     print(f'Accuracy of {dataset.classes[i]} : {100 * class_correct[i] / class_total[i]:.2f}%')
 
 # 混同行列を表示
