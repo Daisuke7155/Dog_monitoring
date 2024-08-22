@@ -41,7 +41,7 @@ model = torch.hub.load(yolov5_path, 'custom', path=os.path.join(yolov5_path, 'yo
 
 # 行動分類モデルの定義
 class SimpleCNN(torch.nn.Module):
-    def __init__(self, num_classes=6):
+    def __init__(self, num_classes=4):
         super(SimpleCNN, self).__init__()
         self.conv1 = torch.nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
@@ -58,7 +58,7 @@ class SimpleCNN(torch.nn.Module):
         return x
 
 # 行動分類モデルの読み込み
-behavior_model = SimpleCNN(num_classes=6)
+behavior_model = SimpleCNN(num_classes=4)
 model_path = os.path.dirname(__file__)
 behavior_model.load_state_dict(torch.load(os.path.join(model_path, 'models/pet_behavior_model.pth')))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -67,7 +67,7 @@ behavior_model.eval()
 
 # クラスラベルの定義
 classes = model.names
-behavior_classes = ['barking', 'sleeping', 'awake', 'drinking', 'defecating', 'urinating']
+behavior_classes = ['sleeping', 'awake', 'defecating', 'urinating']
 
 # 画像の前処理
 transform = T.Compose([
