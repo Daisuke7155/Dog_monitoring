@@ -249,6 +249,16 @@ def plot_urine_color_analysis(data):
     data['color_code'] = data['color'].cat.codes
 
     fig, ax = plt.subplots()
+
+    # 境界線を引く
+    ok_normal_index = categories.index('OK_normal')
+    ax.axhline(y=ok_normal_index - 0.5, color='black', linestyle='--', linewidth=1)
+
+    # 背景色を設定
+    ax.axhspan(ymin=ok_normal_index - 0.5, ymax=len(categories), color='lightblue', alpha=0.3)
+    ax.axhspan(ymin=0, ymax=ok_normal_index - 0.5, color='lightcoral', alpha=0.3)
+
+    # グラフをプロット
     ax.plot(data['date'], data['color_code'], 'o-')
 
     # 日付と時間のフォーマット
@@ -258,10 +268,6 @@ def plot_urine_color_analysis(data):
     # 縦軸の範囲とラベルを固定
     ax.set_yticks(range(len(categories)))
     ax.set_yticklabels(categories)
-
-    # OK_normalの下に境界線を引く
-    ok_normal_index = categories.index('OK_normal')
-    ax.axhline(y=ok_normal_index - 0.5, color='black', linestyle='--', linewidth=1)
 
     plt.xlabel('Date')
     plt.ylabel('Color')
