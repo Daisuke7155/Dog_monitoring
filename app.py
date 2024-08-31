@@ -255,7 +255,8 @@ def plot_urine_color_analysis(data):
     ax.xaxis.set_major_formatter(date_form)
 
     # 縦軸の範囲とラベルを固定
-    ax.set_yticks(categories)
+    ax.set_yticks(range(len(categories)))
+    ax.set_yticklabels(categories)
     
     plt.xlabel('Date')
     plt.ylabel('Color')
@@ -270,6 +271,7 @@ def plot_urine_color_analysis(data):
         image_path = os.path.join(image_folder, image_file)
         if os.path.isfile(image_path):
             st.image(image_path, caption=image_file, use_column_width=True)
+
 
 def display_real_time_video():
     st.subheader('Real-Time Video Feed')
