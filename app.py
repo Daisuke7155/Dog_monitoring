@@ -256,11 +256,7 @@ def plot_urine_color_analysis(data):
 
     # 縦軸の範囲とラベルを固定
     ax.set_yticks(categories)
-
-    # 境界線を追加
-    boundary_index = categories.index('NG_strong_red') - 0.5  # OK_normalの下に線を引く
-    ax.axhline(y=boundary_index, color='black', linestyle='--')
-
+    
     plt.xlabel('Date')
     plt.ylabel('Color')
     plt.title('Urine Color Over Time')
