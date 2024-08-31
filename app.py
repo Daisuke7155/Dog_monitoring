@@ -249,6 +249,9 @@ def plot_urine_color_analysis(data):
     # 日付と時間のフォーマット
     date_form = DateFormatter("%Y-%m-%d %H:%M:%S")
     ax.xaxis.set_major_formatter(date_form)
+
+    # 縦軸の範囲とラベルを固定
+    ax.set_yticks(['OK_normal', 'NG_strong_red', 'NG_red', 'NG_green', 'NG_clear'])
     
     plt.xlabel('Date')
     plt.ylabel('Color')
