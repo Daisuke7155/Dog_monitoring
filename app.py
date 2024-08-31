@@ -246,9 +246,10 @@ def plot_urine_color_analysis(data):
     # カテゴリの順序を指定（OK_normalを最後に表示）
     categories = ['NG_clear', 'NG_green', 'NG_red', 'NG_strong_red', 'OK_normal']
     data['color'] = pd.Categorical(data['color'], categories=categories, ordered=True)
+    data['color_code'] = data['color'].cat.codes
 
     fig, ax = plt.subplots()
-    ax.plot(data['date'], data['color'], 'o-')
+    ax.plot(data['date'], data['color_code'], 'o-')
 
     # 日付と時間のフォーマット
     date_form = DateFormatter("%Y-%m-%d %H:%M:%S")
@@ -275,8 +276,6 @@ def plot_urine_color_analysis(data):
         image_path = os.path.join(image_folder, image_file)
         if os.path.isfile(image_path):
             st.image(image_path, caption=image_file, use_column_width=True)
-
-
 
 def display_real_time_video():
     st.subheader('Real-Time Video Feed')
