@@ -243,16 +243,24 @@ def plot_urine_color_analysis(data):
     data['date'] = pd.to_datetime(data['date'])
     data['color'] = data['color'].str.replace('.jpg', '')
 
+    # カテゴリの順序を指定
+    categories = ['OK_normal', 'NG_strong_red', 'NG_red', 'NG_green', 'NG_clear']
+    data['color'] = pd.Categorical(data['color'], categories=categories, ordered=True)
+
     fig, ax = plt.subplots()
     ax.plot(data['date'], data['color'], 'o-')
-    
+
     # 日付と時間のフォーマット
     date_form = DateFormatter("%Y-%m-%d %H:%M:%S")
     ax.xaxis.set_major_formatter(date_form)
 
     # 縦軸の範囲とラベルを固定
-    ax.set_yticks(['OK_normal', 'NG_strong_red', 'NG_red', 'NG_green', 'NG_clear'])
-    
+    ax.set_yticks(categories)
+
+    # 境界線を追加
+    boundary_index = categories.index('NG_strong_red') - 0.5  # OK_normalの下に線を引く
+    ax.axhline(y=boundary_index, color='black', linestyle='--')
+
     plt.xlabel('Date')
     plt.ylabel('Color')
     plt.title('Urine Color Over Time')
