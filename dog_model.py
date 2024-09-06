@@ -11,7 +11,7 @@ class PetBehaviorDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.classes = ['barking', 'sleeping', 'awake', 'drinking', 'defecating', 'urinating']
+        self.classes = ['sleeping', 'awake', 'defecating', 'urinating']
         self.data = []
         for class_name in self.classes:
             class_dir = os.path.join(root_dir, class_name)
@@ -44,13 +44,13 @@ dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 # CNNモデルの定義
 class SimpleCNN(nn.Module):
-    def __init__(self, num_classes=6):  # クラス数を6に変更
+    def __init__(self, num_classes=4):  # 4クラスに設定
         super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.fc1 = nn.Linear(64 * 56 * 56, 128)
-        self.fc2 = nn.Linear(128, num_classes)
+        self.fc2 = nn.Linear(128, num_classes)  # 出力が4クラス
 
     def forward(self, x):
         x = self.pool(torch.relu(self.conv1(x)))
@@ -61,7 +61,7 @@ class SimpleCNN(nn.Module):
         return x
 
 # モデルのトレーニング
-model = SimpleCNN(num_classes=6)
+model = SimpleCNN(num_classes=4)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
