@@ -287,36 +287,41 @@ def display_real_time_video():
     st.subheader('Real-Time Video Feed')
     run = st.checkbox('Run')
     if run:
-        stframe = st.empty()
+        stframe = st.empty()  # 動画フレームの表示スペースを確保
         # グローバルIPアドレスとポートを設定します
         stream_url = "http://126.36.71.194:8080/?action=stream"
         try:
             while run:
                 response = requests.get(stream_url, stream=True, timeout=30)
                 if response.status_code == 200:
-                    bytes_data = b''
+                    bytes_data = b''  # ストリームのバイトデータを保持
                     for chunk in response.iter_content(chunk_size=1024):
                         bytes_data += chunk
                         a = bytes_data.find(b'\xff\xd8')
                         b = bytes_data.find(b'\xff\xd9')
                         if a != -1 and b != -1:
+                            # 画像データを抽出して表示
                             jpg = bytes_data[a:b+2]
                             bytes_data = bytes_data[b+2:]
                             img = Image.open(BytesIO(jpg))
                             stframe.image(img, use_column_width=True)
-                            break  # 次のフレームに進むためにループを抜ける
+                            break  # 次のフレームに進むためループを抜ける
                 else:
-                    st.error(f"Failed to get video stream. Status code: {response.status_code}")
+                    # ステータスコードが200でない場合、接続失敗
+                    st.error("No connection")
                     break
-        except requests.exceptions.RequestException as e:
-            st.error(f"Error connecting to the video stream: {e}")
+        except requests.exceptions.RequestException:
+            # 例外が発生した場合、「No connection」と表示
+            st.error("No connection")
             
             # ストリーミングが失敗した場合、ローカルの動画ファイルを表示
+            st.write("Demo video:")
             if os.path.exists("./image/realtime/demo.mp4"):
                 st.video("./image/realtime/demo.mp4")
             else:
+                # ローカル動画ファイルが見つからない場合のエラーメッセージ
                 st.error("Local video file not found.")
-
+            
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
 
@@ -325,7 +330,7 @@ page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary 
 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
-    st.image("home.png", caption="Home Image")
+    st.image("./image/home/home.png", caption="Home Image")
     st.image("./image/home/1.png", caption="Issue")
     st.image("./image/home/2.png", caption="Image")
     st.image("./image/home/3.png", caption="Architecture")
