@@ -310,6 +310,12 @@ def display_real_time_video():
                     break
         except requests.exceptions.RequestException as e:
             st.error(f"Error connecting to the video stream: {e}")
+            
+            # ストリーミングが失敗した場合、ローカルの動画ファイルを表示
+            if os.path.exists("./image/realtime/demo.mp4"):
+                st.video("./image/realtime/demo.mp4")
+            else:
+                st.error("Local video file not found.")
 
 # Streamlitアプリのレイアウト
 st.title("Dog Monitoring Data")
@@ -320,11 +326,22 @@ page = st.sidebar.radio("Select a Page", ["Home", "Behavior Analysis", "Urinary 
 if page == "Home":
     st.write("Welcome to the Dog Monitoring Data App. Use the sidebar to navigate to different sections.")
     st.image("home.png", caption="Home Image")
+    st.image("./image/home/1.png", caption="Issue")
+    st.image("./image/home/2.png", caption="Image")
+    st.image("./image/home/3.png", caption="Architecture")
+    st.image("./image/home/4.png", caption="Business")
+    st.image("./image/home/5.png", caption="Future")
+
 elif page == "Behavior Analysis":
     st.write("Behavior Analysis")
+    st.image("./image/action/1.png", caption="Behavior analysis")
     update_behavior_data()
 elif page == "Urinary Analysis":
     st.write("This section provides an analysis of the dog's urine data.")
+    st.image("./image/urine/1.png", caption="Conductivity analysis")
+    st.image("./image/urine/2.png", caption="pH analysis")
+    st.image("./image/urine/3.png", caption="Color analysis")
     update_urine_data()
 elif page == "Real-Time Video":
+    st.image("./image/realtime/1.png", caption="Technical details") 
     display_real_time_video()
