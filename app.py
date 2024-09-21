@@ -292,7 +292,7 @@ def display_real_time_video():
         stream_url = "http://126.36.71.194:8080/?action=stream"
         try:
             while run:
-                response = requests.get(stream_url, stream=True, timeout=30)
+                response = requests.get(stream_url, stream=True, timeout=5)
                 if response.status_code == 200:
                     bytes_data = b''  # ストリームのバイトデータを保持
                     for chunk in response.iter_content(chunk_size=1024):
